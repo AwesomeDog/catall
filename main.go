@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"unicode/utf8"
 
@@ -53,21 +55,37 @@ func isTextFile(path string) (bool, error) {
 }
 
 func main() {
-	listOnly := false
-	showVersion := false
+	listOnly := flag.Bool("list", false, "List matching files only (don't display content)")
+	showVersion := flag.Bool("version", false, "Show version information")
+	showHelp := flag.Bool("help", false, "Show help information")
+	filterPattern := flag.String("filter", "", "Regex pattern to whitelist files (e.g. '\\.(go|java)$')")
+	flag.Parse()
 
-	for _, arg := range os.Args[1:] {
-		switch arg {
-		case "--list":
-			listOnly = true
-		case "--version":
-			showVersion = true
-		}
+	if *showHelp {
+		fmt.Println("Usage: catall [options]")
+		fmt.Println("Concatenate and display contents of text files in directory tree respecting ignore files")
+		fmt.Println("\nOptions:")
+		flag.PrintDefaults()
+		fmt.Println("\nExamples:")
+		fmt.Println("  catall --filter '\\.(go|java)$'   # Process Go and Java files")
+		fmt.Println("  catall --list --filter '\\.go$'    # List Go files")
+		os.Exit(0)
 	}
 
-	if showVersion {
+	if *showVersion {
 		fmt.Printf("catall version %s (commit %s)\n", version, commit)
 		os.Exit(0)
+	}
+
+	var filterRe *regexp.Regexp
+	if *filterPattern != "" {
+		var err error
+		filterRe, err = regexp.Compile(*filterPattern)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error compiling regex: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Valid examples: '\\.go$', '\\.(java|kt)$', '^src/.*\\.java$'\n")
+			os.Exit(1)
+		}
 	}
 
 	// 1. Get output file name if redirected
@@ -110,13 +128,17 @@ func main() {
 			continue
 		}
 
+		if filterRe != nil && !filterRe.MatchString(absPath) {
+			continue
+		}
+
 		files = append(files, absPath)
 	}
 
 	// 3. Sort files alphabetically
 	sort.Strings(files)
 
-	if listOnly {
+	if *listOnly {
 		for _, absPath := range files {
 			rel, _ := filepath.Rel(pwd, absPath)
 			fmt.Println("./" + filepath.ToSlash(rel))
@@ -140,11 +162,7 @@ func main() {
 		fmt.Printf("\n\n==== %s ====\n", relPath)
 
 		isText, err := isTextFile(absPath)
-		if err != nil {
-			fmt.Println("BINARY OR BAD FORMAT")
-			continue
-		}
-		if !isText {
+		if err != nil || !isText {
 			fmt.Println("BINARY OR BAD FORMAT")
 			continue
 		}

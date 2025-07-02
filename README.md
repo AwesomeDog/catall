@@ -49,9 +49,11 @@ cd <your code directory>
 
 # Basic concatenation:
 catall > all.txt  # that will print all to all.txt
+catall --filter '\.(go|java)$'  # process only Go and Java files and print to stdout
 
 # Preview files without concatenating:
 catall --list
+catall --list --filter '\.go$'  # list only Go files
 ```
 
 ## Installation
