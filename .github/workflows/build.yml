@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     strategy:
       matrix:
         platform:
@@ -44,10 +47,10 @@ jobs:
           -o "dist/catall_${GOOS}_${GOARCH}${EXT}" main.go
 
       - name: Upload Release Assets
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: |
-            dist/catall_*
+          files: dist/catall_*
           draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
