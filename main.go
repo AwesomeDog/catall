@@ -82,6 +82,8 @@ func main() {
 	// 2. Walk files with gocodewalker
 	fileListQueue := make(chan *gocodewalker.File, 100)
 	fileWalker := gocodewalker.NewFileWalker(".", fileListQueue)
+	fileWalker.IncludeHidden = true
+	fileWalker.ExcludeDirectory = []string{".git", ".svn", ".hg"}
 	// No extension filter, we want all files
 	fileWalker.SetErrorHandler(func(e error) bool {
 		// Print error and continue
