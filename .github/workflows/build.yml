@@ -40,9 +40,9 @@ jobs:
           GOOS: ${{ matrix.platform.os }}
           GOARCH: ${{ matrix.platform.arch }}
           EXT: ${{ matrix.platform.ext }}
-          VERSION: $(git describe --tags 2>/dev/null || echo v0.0.0)
-          COMMIT: $(git rev-parse --short HEAD 2>/dev/null || echo 0000000)
-        run: |
+        run: | 
+          VERSION=$(git describe --tags 2>/dev/null || echo v0.0.0)
+          COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo 0000000)
           CGO_ENABLED=0 go build -ldflags "-X 'main.version=$VERSION' -X 'main.commit=$COMMIT'" \
           -o "dist/catall_${GOOS}_${GOARCH}${EXT}" main.go
 
