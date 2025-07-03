@@ -1,8 +1,8 @@
 # catall
 
-`catall` is a smarter alternative to the classic `cat` command
+`catall` is a smarter cross-platform alternative to the classic `cat` command
 that recursively concatenates text files while respecting `.gitignore` and `.ignore` files.  
-Perfect for preparing codebases for AI processing.
+Perfect for preparing codebases for AI/LLM processing.
 
 ## Features
 
@@ -80,9 +80,11 @@ Windows (amd64)
 
 ```shell
 curl.exe -LO https://github.com/AwesomeDog/catall/releases/latest/download/catall_windows_amd64.exe
-mv catall_windows_amd64.exe $env:SystemRoot\System32\catall.exe
+mv catall_windows_amd64.exe "$env:LOCALAPPDATA\Microsoft\WindowsApps\catall.exe"
 catall --version
 ```
+
+You may find executables for other platforms in [Releases](https://github.com/AwesomeDog/catall/releases)
 
 ## Manual Build (Requires Go)
 
